@@ -54,6 +54,22 @@ class Line:
 
         return None
 
+    def point_on_line(self, point):
+        # return number of steps from line.p1 to point if true, else none
+
+        # horizontal line
+        if (
+            min(self.p1.x, self.p2.x) < point.x < max(self.p1.x, self.p2.x)
+            and point.y == self.p1.y
+        ):
+            return abs(point.x - self.p1.x)
+        # vertical self
+        if (
+            min(self.p1.y, self.p2.y) < point.y < max(self.p1.y, self.p2.y)
+            and point.x == self.p1.x
+        ):
+            return abs(point.y - self.p1.y)
+
 
 class Wire:
     def __init__(self, wire: str):
@@ -84,6 +100,19 @@ class Wire:
             p1 = p2
         return lines
 
+    def steps_to_point(self, point):
+        # roll through each line on this wire until we reach the point
+        # keep a running sum of the steps until we get there
+        steps = 0
+        for line in self.lines:
+            pol = line.point_on_line(point)
+            if pol:
+                return steps + pol
+            steps += abs(line.p1.x - line.p2.x) + abs(line.p1.y - line.p2.y)
+
+        # never found the point on the line
+        return None
+
 
 class Panel:
     def __init__(self, wires):
@@ -92,6 +121,7 @@ class Panel:
         self.wire_2 = Wire(wires.split("\n")[1])
         self.intersections = self.find_intersections()
         self.mh_dist = Point.min_manhattan_dist(self.intersections)
+        self.min_steps = self.calc_min_steps()
 
     def find_intersections(self):
         intersections = []
@@ -102,6 +132,16 @@ class Panel:
                     intersections.append(p)
         return intersections
 
+    def calc_min_steps(self):
+        min_steps = 99999999999
+        for intersect in self.intersections:
+            new_steps = self.wire_1.steps_to_point(
+                intersect
+            ) + self.wire_2.steps_to_point(intersect)
+            min_steps = min(min_steps, new_steps)
+
+        return min_steps
+
 
 if __name__ == "__main__":
     with open("inputs/day03") as f:
@@ -109,3 +149,4 @@ if __name__ == "__main__":
 
     p = Panel(wires)
     print(f"manhattan distance = { p.mh_dist }")
+    print(f"min steps = { p.min_steps }")
