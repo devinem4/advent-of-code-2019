@@ -1,5 +1,4 @@
 import pytest
-from collections import namedtuple
 
 from fuel_counter_upper.fuel_counter_upper import FuelCounterUpper
 
