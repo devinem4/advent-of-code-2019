@@ -32,11 +32,13 @@ if __name__ == "__main__":
     with open("inputs/day02") as f:
         initial_state = f.read()
 
-    cpu = IntcodeCpu(initial_state)
-    # replace position 1 with the value 12
-    cpu.state[1] = 12
-    # replace position 2 with the value 2
-    cpu.state[2] = 2
-    cpu.process()
-
-    print(f"final answer = { cpu.state[0] }")
+    target = 19690720
+    for noun in range(0, 100):
+        for verb in range(0, 100):
+            cpu = IntcodeCpu(initial_state)
+            cpu.state[1] = noun
+            cpu.state[2] = verb
+            cpu.process()
+            # final answer is position 0 of final state
+            if target == cpu.state[0]:
+                print(f"target achieved: { noun } { verb } = { noun * 100 + verb }")
