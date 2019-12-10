@@ -13,5 +13,5 @@ class TestFuelCounterUpper:
     def test_calc_fuel_req(self):
         run_test_case(12, 2)
         run_test_case(14, 2)
-        run_test_case(1969, 654)
-        run_test_case(100756, 33583)
+        run_test_case(1969, 966)
+        run_test_case(100756, 50346)

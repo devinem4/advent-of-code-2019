@@ -10,11 +10,18 @@ class FuelCounterUpper:
     @classmethod
     def calc_fuel_req(cls, mass: int) -> int:
         """calc fuel required for moving input mass
+        
+        Don't forget to account for the weight of the fuel, too!
 
         Returns:
             int -- fuel required
         """
-        return max(int(mass / 3) - 2, 0)
+        fuel_need = max(int(mass / 3) - 2, 0)
+
+        if fuel_need == 0:
+            return 0
+
+        return fuel_need + cls.calc_fuel_req(fuel_need)
 
 
 if __name__ == "__main__":
