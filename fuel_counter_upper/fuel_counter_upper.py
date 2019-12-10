@@ -23,8 +23,6 @@ if __name__ == "__main__":
     with open("inputs/day01") as f:
         masses = f.readlines()
 
-    total_fuel = 0
-    for m in masses:
-        total_fuel += fcu.calc_fuel_req(int(m))
+    total_fuel = sum([fcu.calc_fuel_req(int(m)) for m in masses])
 
     print(f"total fuel required = { total_fuel }")
