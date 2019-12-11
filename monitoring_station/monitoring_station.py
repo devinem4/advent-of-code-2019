@@ -47,37 +47,35 @@ class SpaceMap:
 
         visible_asteroids = []
 
-        for y in range(0, self.map_rows):
-            for x in range(0, self.map_cols):
-                if x == pos_x and y == pos_y:
-                    # looking at itself -- doesnt count
-                    continue
+        for ast in self.asteroids:
+            if ast == Asteroid(pos_x, pos_y):
+                continue
 
-                # print(f"checking: { x }, { y }")
-                rise = pos_y - y
-                run = x - pos_x
-                # how many actual points on our map are on this line?
-                points_on_line = gcd(rise, run)
-                rise = rise / points_on_line
-                run = run / points_on_line
+            # print(f"checking: { ast.x }, { ast.y }")
+            rise = pos_y - ast.y
+            run = ast.x - pos_x
+            # how many actual points on our map are on this line?
+            points_on_line = gcd(rise, run)
+            rise = rise / points_on_line
+            run = run / points_on_line
 
-                # print(f"    slope: { rise } / { run } -> { points_on_line }")
+            # print(f"    slope: { rise } / { run } -> { points_on_line }")
 
-                for i in range(1, points_on_line + 1):
-                    check_x = pos_x + run * i
-                    check_y = pos_y - rise * i
-                    possible_asteroid = Asteroid(check_x, check_y)
+            for i in range(1, points_on_line + 1):
+                check_x = pos_x + run * i
+                check_y = pos_y - rise * i
+                possible_asteroid = Asteroid(check_x, check_y)
 
-                    if possible_asteroid in self.asteroids:
-                        if possible_asteroid not in visible_asteroids:
-                            # new asteroid found
-                            visible_asteroids.append(possible_asteroid)
-                            # print(f"    added { possible_asteroid }")
-                        else:
-                            # old asteroid found again
-                            # print(f"    already found { possible_asteroid }")
-                            pass
-                        break
+                if possible_asteroid in self.asteroids:
+                    if possible_asteroid not in visible_asteroids:
+                        # new asteroid found
+                        visible_asteroids.append(possible_asteroid)
+                        # print(f"    added { possible_asteroid }")
+                    else:
+                        # old asteroid found again
+                        # print(f"    already found { possible_asteroid }")
+                        pass
+                    break
 
         return len(visible_asteroids)
 
