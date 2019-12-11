@@ -22,6 +22,7 @@ class SpaceMap:
         self.convert_map()
         self.make_asteroid_list()
         self.find_best_location()
+        self.laser_angle = 0
 
     def convert_map(self):
         """converts a map string to array of 1s (asteroids) and zeroes (empty)"""
@@ -41,8 +42,8 @@ class SpaceMap:
                 if location:
                     self.asteroids.append(Asteroid(x, y))
 
-    def count_visible_asteroids(self, pos_x, pos_y):
-        """ from position x, y -- how many asteroids can be seen? """
+    def get_visible_asteroids(self, pos_x, pos_y):
+        """ from position x, y -- which asteroids can be seen? """
         # draw a line from x, y to all locations
         # find the first asteroid that intersects and add to the list
 
@@ -78,13 +79,13 @@ class SpaceMap:
                         pass
                     break
 
-        return len(visible_asteroids)
+        return visible_asteroids
 
     def find_best_location(self):
         best_asteroid = None
         most_visible = 0
         for asteroid in self.asteroids:
-            visible = self.count_visible_asteroids(asteroid.x, asteroid.y)
+            visible = len(self.get_visible_asteroids(asteroid.x, asteroid.y))
             print(asteroid, visible)
             if visible > most_visible:
                 best_asteroid = asteroid
@@ -97,4 +98,4 @@ if __name__ == "__main__":
         m = SpaceMap(f.read())
 
     x, y = m.station.x, m.station.y
-    print(f"best loc = { x }, { y }, { m.count_visible_asteroids(x, y) } asteroids")
+    print(f"best loc = { x }, { y }, { len(m.get_visible_asteroids(x, y)) } asteroids")

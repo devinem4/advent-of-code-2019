@@ -9,7 +9,7 @@ def run_test_case(map, best_loc_x, best_loc_y, asteroid_ct):
     x, y = m.station.x, m.station.y
     assert best_loc_x == x
     assert best_loc_y == y
-    assert asteroid_ct == m.count_visible_asteroids(x, y)
+    assert asteroid_ct == len(m.get_visible_asteroids(x, y))
 
 
 class TestFuelCounterUpper:
