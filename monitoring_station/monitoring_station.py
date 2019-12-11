@@ -21,6 +21,7 @@ class SpaceMap:
         self.map_str = map_str
         self.convert_map()
         self.make_asteroid_list()
+        self.find_best_location()
 
     def convert_map(self):
         """converts a map string to array of 1s (asteroids) and zeroes (empty)"""
@@ -88,12 +89,12 @@ class SpaceMap:
             if visible > most_visible:
                 best_asteroid = asteroid
                 most_visible = visible
-        return best_asteroid.x, best_asteroid.y
+        self.station = Asteroid(best_asteroid.x, best_asteroid.y)
 
 
 if __name__ == "__main__":
     with open("inputs/day10") as f:
         m = SpaceMap(f.read())
 
-    x, y = m.find_best_location()
+    x, y = m.station.x, m.station.y
     print(f"best loc = { x }, { y }, { m.count_visible_asteroids(x, y) } asteroids")

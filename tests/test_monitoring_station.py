@@ -6,7 +6,7 @@ from monitoring_station.monitoring_station import SpaceMap
 def run_test_case(map, best_loc_x, best_loc_y, asteroid_ct):
     with open(f"tests/monitoring_station_maps/{ map }") as f:
         m = SpaceMap(f.read())
-    x, y = m.find_best_location()
+    x, y = m.station.x, m.station.y
     assert best_loc_x == x
     assert best_loc_y == y
     assert asteroid_ct == m.count_visible_asteroids(x, y)
