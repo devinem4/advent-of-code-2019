@@ -1,4 +1,4 @@
-from math import atan2
+from math import atan2, pi
 
 
 class Asteroid:
@@ -14,6 +14,10 @@ class Asteroid:
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
+
+    def set_dist_from_station(self, station):
+        # manhattan dist is good enough
+        self.dist_from_station = abs(self.x - station.x) + abs(self.y - station.y)
 
 
 class SpaceMap:
@@ -61,6 +65,10 @@ class SpaceMap:
             rise = pos_y - ast.y
             run = ast.x - pos_x
             angle_to_ast = atan2(run, rise)
+            if angle_to_ast < 0:
+                # since we are dealing with radians, anything over 180 degrees is a negative
+                # this should put the angles in clockwise order.
+                angle_to_ast = 2 * 3.14159 + angle_to_ast
             asteroids_at_this_angle = angle_dict.get(angle_to_ast, [])
             asteroids_at_this_angle.append(ast)
             angle_dict[angle_to_ast] = asteroids_at_this_angle
@@ -78,7 +86,14 @@ class SpaceMap:
                 best_asteroid = asteroid
                 most_visible = visible_ct
                 self.angle_dict = angle_dict
+
         self.station = best_asteroid
+        for angle, asteroids in self.angle_dict.items():
+            for asteroid in asteroids:
+                asteroid.set_dist_from_station(best_asteroid)
+            self.angle_dict[angle] = sorted(
+                asteroids, key=lambda x: x.dist_from_station
+            )
 
 
 if __name__ == "__main__":
