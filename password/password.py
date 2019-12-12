@@ -6,10 +6,8 @@ class Password:
         given the reqs above
         """
         valid_count = 0
-        for _ in range(low, high + 1):
-            digits = reversed([int(i) for i in str(digits)])
-
-            if validator(digits):
+        for n in range(low, high + 1):
+            if validator(str(n)):
                 valid_count += 1
 
         return valid_count
