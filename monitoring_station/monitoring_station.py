@@ -1,4 +1,4 @@
-from math import gcd
+from math import atan2, pi
 
 
 class Asteroid:
@@ -15,12 +15,17 @@ class Asteroid:
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
+    def set_dist_from_station(self, station):
+        # manhattan dist is good enough
+        self.dist_from_station = abs(self.x - station.x) + abs(self.y - station.y)
+
 
 class SpaceMap:
     def __init__(self, map_str):
         self.map_str = map_str
         self.convert_map()
         self.make_asteroid_list()
+        self.find_best_location()
 
     def convert_map(self):
         """converts a map string to array of 1s (asteroids) and zeroes (empty)"""
@@ -40,60 +45,83 @@ class SpaceMap:
                 if location:
                     self.asteroids.append(Asteroid(x, y))
 
-    def count_visible_asteroids(self, pos_x, pos_y):
-        """ from position x, y -- how many asteroids can be seen? """
-        # draw a line from x, y to all locations
-        # find the first asteroid that intersects and add to the list
+    def get_asteroid_angle_dict(self, pos_x, pos_y):
+        """
+        from position x, y -- which angles have asteroids can be seen?
+        
+        find all of the angles from pos_x, pos_y that hit any asteroid
+        for now we don't care which one it hits
+        """
 
-        visible_asteroids = []
+        # angles from hero asteroid: [ list of asteroids at that angle ]
+        angle_dict = {}
 
         for ast in self.asteroids:
             if ast == Asteroid(pos_x, pos_y):
+                # dont check ourself
                 continue
 
-            # print(f"checking: { ast.x }, { ast.y }")
             rise = pos_y - ast.y
             run = ast.x - pos_x
-            # how many actual points on our map are on this line?
-            points_on_line = gcd(rise, run)
-            rise = rise / points_on_line
-            run = run / points_on_line
+            angle_to_ast = atan2(run, rise)
+            if angle_to_ast < 0:
+                # since we are dealing with radians, anything over 180 degrees is a negative
+                # this should put the angles in clockwise order.
+                angle_to_ast = 2 * 3.14159 + angle_to_ast
+            asteroids_at_this_angle = angle_dict.get(angle_to_ast, [])
+            asteroids_at_this_angle.append(ast)
+            angle_dict[angle_to_ast] = asteroids_at_this_angle
 
-            # print(f"    slope: { rise } / { run } -> { points_on_line }")
-
-            for i in range(1, points_on_line + 1):
-                check_x = pos_x + run * i
-                check_y = pos_y - rise * i
-                possible_asteroid = Asteroid(check_x, check_y)
-
-                if possible_asteroid in self.asteroids:
-                    if possible_asteroid not in visible_asteroids:
-                        # new asteroid found
-                        visible_asteroids.append(possible_asteroid)
-                        # print(f"    added { possible_asteroid }")
-                    else:
-                        # old asteroid found again
-                        # print(f"    already found { possible_asteroid }")
-                        pass
-                    break
-
-        return len(visible_asteroids)
+        return angle_dict
 
     def find_best_location(self):
         best_asteroid = None
         most_visible = 0
         for asteroid in self.asteroids:
-            visible = self.count_visible_asteroids(asteroid.x, asteroid.y)
-            print(asteroid, visible)
-            if visible > most_visible:
+            angle_dict = self.get_asteroid_angle_dict(asteroid.x, asteroid.y)
+            visible_ct = len(angle_dict.keys())
+            # print(asteroid, visible_ct, angle_dict)
+            if visible_ct > most_visible:
                 best_asteroid = asteroid
-                most_visible = visible
-        return best_asteroid.x, best_asteroid.y
+                most_visible = visible_ct
+                self.angle_dict = angle_dict
+
+        self.station = best_asteroid
+        for angle, asteroids in self.angle_dict.items():
+            for asteroid in asteroids:
+                asteroid.set_dist_from_station(best_asteroid)
+            self.angle_dict[angle] = sorted(
+                asteroids, key=lambda x: x.dist_from_station
+            )
+
+    def vaporize_asteroids(self, num_asteroids):
+        """
+        vaporize num_asteroids by firing our giant laser n times
+
+        laser always aims up to begin, rotates to next clockwise
+        asteroid after each fire.
+
+        returns the position of the last vaporized asteroid
+        """
+        vaporized = 0
+        while vaporized < num_asteroids:
+            for angle in sorted(self.angle_dict.keys()):
+                if self.angle_dict[angle]:
+                    # there are un-vaporized asteroids left at this angle
+                    last_vaporized = self.angle_dict[angle].pop(0)
+                    vaporized += 1
+                    if vaporized >= num_asteroids:
+                        break
+        return last_vaporized
 
 
 if __name__ == "__main__":
     with open("inputs/day10") as f:
         m = SpaceMap(f.read())
 
-    x, y = m.find_best_location()
-    print(f"best loc = { x }, { y }, { m.count_visible_asteroids(x, y) } asteroids")
+    x, y = m.station.x, m.station.y
+    print(f"best loc = { x }, { y }, { len(m.angle_dict.keys()) } asteroids")
+
+    ast_200 = m.vaporize_asteroids(200)
+    print(f"the 200th vaporized asteroid = { ast_200 }")
+    print(f"solution = { ast_200.x * 100 + ast_200.y }")
