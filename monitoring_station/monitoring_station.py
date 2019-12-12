@@ -26,7 +26,6 @@ class SpaceMap:
         self.convert_map()
         self.make_asteroid_list()
         self.find_best_location()
-        self.laser_angle = 0
 
     def convert_map(self):
         """converts a map string to array of 1s (asteroids) and zeroes (empty)"""
@@ -95,6 +94,26 @@ class SpaceMap:
                 asteroids, key=lambda x: x.dist_from_station
             )
 
+    def vaporize_asteroids(self, num_asteroids):
+        """
+        vaporize num_asteroids by firing our giant laser n times
+
+        laser always aims up to begin, rotates to next clockwise
+        asteroid after each fire.
+
+        returns the position of the last vaporized asteroid
+        """
+        vaporized = 0
+        while vaporized < num_asteroids:
+            for angle in sorted(self.angle_dict.keys()):
+                if self.angle_dict[angle]:
+                    # there are un-vaporized asteroids left at this angle
+                    last_vaporized = self.angle_dict[angle].pop(0)
+                    vaporized += 1
+                    if vaporized >= num_asteroids:
+                        break
+        return last_vaporized
+
 
 if __name__ == "__main__":
     with open("inputs/day10") as f:
@@ -102,3 +121,7 @@ if __name__ == "__main__":
 
     x, y = m.station.x, m.station.y
     print(f"best loc = { x }, { y }, { len(m.angle_dict.keys()) } asteroids")
+
+    ast_200 = m.vaporize_asteroids(200)
+    print(f"the 200th vaporized asteroid = { ast_200 }")
+    print(f"solution = { ast_200.x * 100 + ast_200.y }")
