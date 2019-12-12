@@ -6,10 +6,8 @@ class Password:
         given the reqs above
         """
         valid_count = 0
-        for n in range(low, high + 1):
-            digits = []
-            for m in [100000, 10000, 1000, 100, 10, 1]:
-                digits.append(int(n / m % 10))
+        for _ in range(low, high + 1):
+            digits = reversed([int(i) for i in str(digits)])
 
             if validator(digits):
                 valid_count += 1
@@ -34,11 +32,27 @@ class Password:
                 pair_found = True
         return pair_found
 
+    @classmethod
+    def validator_2(self, digits):
+        """
+        same as validator 1 except...
+
+        two adjacent matching digits can not be part of a larger group of 
+        matching digits
+        """
+        for i in range(0, len(digits) - 1):
+            if digits[i] > digits[i + 1]:
+                return False
+
+        for d in digits:
+            if digits.count(d) == 2:
+                return True
+
 
 if __name__ == "__main__":
     # puzzle input
     low = 130254
     high = 678275
 
-    combos = Password.count_valid_combos(low, high, Password.validator_1)
+    combos = Password.count_valid_combos(low, high, Password.validator_2)
     print(f"{ combos } possible combos between { low } and { high } inclusive")
